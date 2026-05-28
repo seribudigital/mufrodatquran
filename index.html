@@ -29,7 +29,12 @@
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <h1 class="text-xl font-semibold cursor-pointer" onclick="app.showDashboard()">Mufrodat<span class="font-light">Qur'an</span></h1>
             <div class="flex items-center space-x-4">
-                <div id="user-greeting" class="text-emerald-100 font-medium text-sm hidden sm:block"></div>
+                <div id="user-profile-nav" class="hidden items-center space-x-3">
+                    <span id="user-nav-name" class="text-emerald-100 font-medium text-sm hidden sm:block"></span>
+                    <div id="user-nav-avatar" class="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center font-bold uppercase shadow-sm">
+                        <!-- Initial -->
+                    </div>
+                </div>
                 <div id="nav-actions" class="hidden">
                     <button onclick="app.showSurahMenu()" class="text-emerald-100 hover:text-white transition text-sm">
                         &larr; Kembali ke Menu

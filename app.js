@@ -164,10 +164,19 @@ const app = {
     // --- DASHBOARD ---
     showDashboard() {
         if (this.userData) {
-            const greetingEl = document.getElementById('user-greeting');
-            const kategoriPendek = this.userData.kategori === 'Pelajar/Santri' ? 'Pelajar' : 'Umum';
-            greetingEl.textContent = `Ahlan wa Sahlan, ${this.userData.nama} (${kategoriPendek})`;
-            greetingEl.classList.remove('hidden');
+            const profileNavEl = document.getElementById('user-profile-nav');
+            if (profileNavEl) {
+                profileNavEl.classList.remove('hidden');
+                profileNavEl.classList.add('flex');
+                
+                const nameEl = document.getElementById('user-nav-name');
+                const avatarEl = document.getElementById('user-nav-avatar');
+                
+                if (nameEl) nameEl.textContent = this.userData.nama;
+                if (avatarEl) {
+                    avatarEl.textContent = this.userData.nama.charAt(0);
+                }
+            }
 
             const heroGreetingEl = document.getElementById('hero-greeting');
             if (heroGreetingEl) {
