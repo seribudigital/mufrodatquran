@@ -193,7 +193,7 @@ const app = {
         });
 
         // Tampilkan kartu untuk setiap surat
-        const sortedSurahs = Array.from(surahMap.values()).sort((a, b) => a.id - b.id);
+        const sortedSurahs = Array.from(surahMap.values()).sort((a, b) => b.id - a.id);
         
         if (sortedSurahs.length === 0) {
             container.innerHTML = `<p class="col-span-full text-center text-gray-500">Data tidak tersedia.</p>`;
