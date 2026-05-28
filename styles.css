@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-arabic {
+    font-family: 'Amiri', serif;
+  }
+}
+
+/* 3D Flip Card Styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Custom Blur Classes */
+.blur-text {
+  filter: blur(5px);
+  user-select: none;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.blur-text.unblurred {
+  filter: blur(0px) !important;
+}
+
+/* View transition helpers */
+.view-section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Checkbox styles for Tutup Kata */
+.hafal-btn {
+  transition: all 0.2s ease;
+}
+.hafal-btn.hafal-active {
+  background-color: #10b981; /* emerald-500 */
+  color: white;
+  border-color: #10b981;
+}

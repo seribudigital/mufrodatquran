@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hafalan Mufrodat Al-Qur'an</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen overflow-y-scroll">
+    
+    <!-- Navbar -->
+    <nav class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-semibold cursor-pointer" onclick="app.showDashboard()">Mufrodat<span class="font-light">Qur'an</span></h1>
+            <div class="flex items-center space-x-4">
+                <div id="user-greeting" class="text-emerald-100 font-medium text-sm hidden sm:block"></div>
+                <div id="nav-actions" class="hidden">
+                    <button onclick="app.showSurahMenu()" class="text-emerald-100 hover:text-white transition text-sm">
+                        &larr; Kembali ke Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6" id="app-container">
+        
+        <!-- Welcome Screen -->
+        <section id="view-welcome" class="view-section hidden flex flex-col items-center justify-center min-h-[70vh]">
+            <div class="text-center mb-10">
+                <h1 class="text-5xl font-bold text-emerald-700 mb-4 tracking-tight">Mufrodat<span class="font-light text-gray-700">Qur'an</span></h1>
+                <p class="text-lg text-gray-600 max-w-lg mx-auto">Mari uji dan tingkatkan hafalan kosakata Al-Qur'an Anda dengan mudah dan menyenangkan.</p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-2xl shadow-xl shadow-emerald-900/5 border border-gray-100 w-full max-w-md">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-1">Mulai Perjalanan Anda</h3>
+                    <p class="text-sm text-gray-500">Isi profil singkat di bawah ini terlebih dahulu.</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                        <input type="text" id="welcome-nama" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition" placeholder="Masukkan nama Anda">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori Pengguna</label>
+                        <select id="welcome-kategori" onchange="app.updateKategoriForm()" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition cursor-pointer bg-white">
+                            <option value="Pelajar/Santri">Pelajar / Santri</option>
+                            <option value="Umum">Umum</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label id="label-detail" class="block text-sm font-semibold text-gray-700 mb-1">Kelas / Nama Instansi Sekolah</label>
+                        <input type="text" id="welcome-detail" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition" placeholder="Contoh: Kelas 10 / SMA Bina Bangsa">
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button onclick="app.simpanProfil()" class="w-full bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-emerald-700 hover:shadow-lg transition transform hover:-translate-y-0.5">
+                            Mulai Menghafal & Ujian 🚀
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard (List of Surahs) -->
+        <section id="view-dashboard" class="view-section hidden">
+            
+            <!-- Hero Section -->
+            <div id="dashboard-hero" class="mb-8">
+                <!-- Sapaan & Motivasi -->
+                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 shadow-sm border border-emerald-200 mb-6 flex flex-col md:flex-row gap-6 items-center">
+                    <div class="flex-1">
+                        <h2 class="text-3xl font-bold text-emerald-800 mb-3" id="hero-greeting">Ahlan wa Sahlan! 👋</h2>
+                        <p class="text-emerald-700 italic border-l-4 border-emerald-400 pl-4 py-1">"Sebaik-baik kalian adalah orang yang belajar Al-Qur'an dan mengajarkannya" <br><span class="text-sm font-semibold">— HR. Bukhari</span></p>
+                    </div>
+                    
+                    <!-- Callout Doa -->
+                    <div class="bg-white p-5 rounded-xl shadow border border-emerald-100 md:w-1/3 text-center">
+                        <p class="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-2">Doa Sebelum Belajar</p>
+                        <p class="font-arabic text-2xl text-gray-800 leading-relaxed mb-2" dir="rtl">رَبِّ زِدْنِي عِلْمًا وَارْزُقْنِي فَهْمًا</p>
+                        <p class="text-xs text-gray-500 italic">"Ya Tuhanku, tambahkanlah ilmu kepadaku dan berilah aku pemahaman yang baik"</p>
+                    </div>
+                </div>
+
+                <!-- Edukasi & Arahan Penggunaan -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Panduan Penggunaan</h3>
+                    <p class="text-sm text-gray-600 mb-4">Aplikasi ini menyediakan kosakata kata-per-kata Al-Qur'an untuk memudahkan Anda memahami arti bacaan salat dan hafalan secara mendalam.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <span class="text-2xl">📖</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-700 text-sm">1. Pilih Surat</h4>
+                                <p class="text-xs text-gray-500 mt-1">Tentukan surat atau juz yang ingin dipelajari di bawah.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <span class="text-2xl">🧠</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-700 text-sm">2. Pelajari Mufrodat</h4>
+                                <p class="text-xs text-gray-500 mt-1">Klik kata-per-kata untuk memunculkan arti kontekstualnya.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <span class="text-2xl">⏱️</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-700 text-sm">3. Uji Hafalan</h4>
+                                <p class="text-xs text-gray-500 mt-1">Ikuti ujian hafalan 10 detik per soal untuk menguji pemahaman Anda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-6 border-b pb-2 border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-700">Pilih Surat</h2>
+                <select id="juz-selector" onchange="app.changeJuz(this.value)" class="bg-white border border-gray-300 text-gray-700 py-1.5 px-3 rounded-lg outline-none font-semibold shadow-sm focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                    <option value="30">Juz 30</option>
+                    <option value="29">Juz 29</option>
+                    <option value="28">Juz 28</option>
+                    <option value="27">Juz 27</option>
+                    <option value="26">Juz 26</option>
+                </select>
+            </div>
+            <div id="surah-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- Surah Menu (Choose feature) -->
+        <section id="view-surah-menu" class="view-section hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-emerald-700 mb-2" id="menu-surah-title">Surat ...</h2>
+                <p class="text-gray-500">Pilih metode hafalan yang ingin kamu gunakan</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Baca Quran -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition cursor-pointer" onclick="app.startBacaQuran()">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        📜
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Baca Qur'an</h3>
+                    <p class="text-sm text-gray-500">Baca ayat penuh dengan atau tanpa terjemahan.</p>
+                </div>
+                <!-- Tutup Kata -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition cursor-pointer" onclick="app.startTutupKata()">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        📖
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Tutup Kata</h3>
+                    <p class="text-sm text-gray-500">Hafalkan dengan menyembunyikan teks Arab atau artinya per ayat.</p>
+                </div>
+                <!-- Flashcard -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition cursor-pointer" onclick="app.startFlashcard()">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        📇
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Flashcard</h3>
+                    <p class="text-sm text-gray-500">Uji ingatanmu kata per kata menggunakan kartu bolak-balik.</p>
+                </div>
+                <!-- Kuis -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition cursor-pointer" onclick="app.startKuis()">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        🎯
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Kuis Pilihan Ganda</h3>
+                    <p class="text-sm text-gray-500">Evaluasi hafalanmu dengan menjawab 10 pertanyaan acak.</p>
+                </div>
+                <!-- Ujian Hafalan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition cursor-pointer md:col-span-2" onclick="app.startUjian()">
+                    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        ⏱️
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Ujian Hafalan</h3>
+                    <p class="text-sm text-gray-500">Uji kefasihanmu dengan 50 soal dalam waktu terbatas (10 detik/soal). Hasil akan dicatat ke riwayat.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Baca Quran Feature -->
+        <section id="view-baca-quran" class="view-section hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 md:mb-0">Mode Baca Qur'an</h2>
+                <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                    <button id="btn-quran-saja" onclick="app.setBacaMode('saja')" class="px-4 py-2 bg-white shadow-sm text-emerald-700 rounded-md text-sm font-medium transition">Qur'an Saja</button>
+                    <button id="btn-quran-terjemah" onclick="app.setBacaMode('terjemah')" class="px-4 py-2 text-gray-600 rounded-md text-sm font-medium hover:text-gray-800 transition">Qur'an + Terjemahan</button>
+                </div>
+            </div>
+            <div id="baca-quran-container" class="space-y-6">
+                <!-- Ayat blocks injected here -->
+            </div>
+        </section>
+
+        <!-- Tutup Kata Feature -->
+        <section id="view-tutup-kata" class="view-section hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 md:mb-0">Mode Tutup Kata</h2>
+                <div class="flex space-x-3">
+                    <button id="toggle-arab" onclick="app.toggleBlur('arab')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition">Sembunyikan Arab</button>
+                    <button id="toggle-indo" onclick="app.toggleBlur('indo')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition">Sembunyikan Arti</button>
+                </div>
+            </div>
+            <div id="tutup-kata-container" class="space-y-6">
+                <!-- Ayat blocks injected here -->
+            </div>
+        </section>
+
+        <!-- Flashcard Feature -->
+        <section id="view-flashcard" class="view-section hidden flex flex-col items-center justify-center py-10">
+            <div class="mb-4 text-gray-500 font-medium" id="flashcard-counter">Kata 1 dari 10</div>
+            
+            <div class="flashcard-container w-full max-w-md h-80 perspective-1000 cursor-pointer" onclick="app.flipCard(this)">
+                <div class="flashcard w-full h-full relative preserve-3d transition-transform duration-500" id="current-flashcard">
+                    <!-- Front (Arab) -->
+                    <div class="flashcard-front absolute w-full h-full bg-white rounded-2xl shadow-lg border-2 border-emerald-100 flex items-center justify-center p-8 backface-hidden">
+                        <p class="font-arabic text-5xl text-gray-800 leading-relaxed text-center" id="fc-arab"></p>
+                        <span class="absolute bottom-4 text-xs text-gray-400">Ketuk untuk membalik</span>
+                    </div>
+                    <!-- Back (Indo) -->
+                    <div class="flashcard-back absolute w-full h-full bg-emerald-50 rounded-2xl shadow-lg border-2 border-emerald-200 flex items-center justify-center p-8 backface-hidden rotate-y-180 text-center">
+                        <div>
+                            <p class="font-sans text-2xl font-semibold text-emerald-800 mb-2" id="fc-indo"></p>
+                            <span class="text-xs text-gray-400">Ketuk untuk membalik</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex space-x-4 w-full max-w-md">
+                <button onclick="app.nextFlashcard(false)" class="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition shadow-sm">Belum Hafal</button>
+                <button onclick="app.nextFlashcard(true)" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition shadow-sm">Sudah Hafal</button>
+            </div>
+        </section>
+
+        <!-- Kuis Feature -->
+        <section id="view-kuis" class="view-section hidden max-w-lg mx-auto py-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-700">Kuis Pilihan Ganda</h2>
+                <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-semibold" id="kuis-counter">1/10</span>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center mb-6">
+                <p class="text-sm text-gray-500 mb-4">Apa arti dari kata berikut?</p>
+                <p class="font-arabic text-5xl text-gray-800 leading-relaxed" id="kuis-question"></p>
+            </div>
+
+            <div id="kuis-options" class="space-y-3">
+                <!-- Options injected here -->
+            </div>
+
+            <div class="mt-6 text-center hidden" id="kuis-next-container">
+                <button onclick="app.nextKuis()" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition shadow-sm w-full">Selanjutnya</button>
+            </div>
+            
+            <!-- Quiz Result -->
+            <div id="kuis-result" class="hidden text-center py-10">
+                <div class="text-6xl mb-4">🏆</div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Kuis Selesai!</h3>
+                <p class="text-lg text-gray-600 mb-6">Skor kamu: <span id="kuis-score" class="font-bold text-emerald-600"></span></p>
+                <button onclick="app.showSurahMenu()" class="bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-900 transition">Kembali ke Menu</button>
+            </div>
+        </section>
+
+        <!-- Ujian Hafalan Feature -->
+        <section id="view-ujian" class="view-section hidden max-w-lg mx-auto py-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-700">Ujian Hafalan</h2>
+                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold" id="ujian-counter">1/50</span>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-3 mb-6 relative overflow-hidden">
+                <div id="ujian-timer-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-1000 linear" style="width: 100%"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700" id="ujian-timer-text">10s</div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center mb-6">
+                <p class="text-sm text-gray-500 mb-4">Pilih arti yang tepat dengan cepat!</p>
+                <p class="font-arabic text-5xl text-gray-800 leading-relaxed" id="ujian-question"></p>
+            </div>
+
+            <div id="ujian-options" class="space-y-3">
+                <!-- Options injected here -->
+            </div>
+        </section>
+
+        <!-- Ujian Result -->
+        <section id="view-ujian-result" class="view-section hidden max-w-lg mx-auto py-10 text-center">
+            <div class="text-6xl mb-4" id="ujian-result-icon">🎓</div>
+            <h3 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h3>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 my-6">
+                <p class="text-5xl font-black text-emerald-600 mb-2" id="ujian-final-score">100</p>
+                <p class="text-sm text-gray-500 uppercase tracking-widest font-semibold mb-4">Skor Akhir</p>
+                <div class="flex justify-center space-x-8 text-sm">
+                    <div>
+                        <span class="block text-2xl font-bold text-emerald-500" id="ujian-correct-count">0</span>
+                        <span class="text-gray-500">Benar</span>
+                    </div>
+                    <div>
+                        <span class="block text-2xl font-bold text-red-500" id="ujian-wrong-count">0</span>
+                        <span class="text-gray-500">Salah</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-3">
+                <button onclick="app.showHistory()" class="bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-900 transition shadow-sm">Lihat Riwayat</button>
+                <button onclick="app.startUjian()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition shadow-sm">Ulangi Ujian</button>
+                <button onclick="app.showSurahMenu()" class="text-gray-500 hover:text-gray-800 py-2 font-medium">Kembali ke Menu</button>
+            </div>
+        </section>
+
+        <!-- History View -->
+        <section id="view-history" class="view-section hidden max-w-2xl mx-auto py-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Riwayat Ujian</h2>
+                <button onclick="app.showDashboard()" class="text-emerald-600 font-medium hover:text-emerald-700 transition">&larr; Dasbor</button>
+            </div>
+            
+            <div id="history-container" class="space-y-4">
+                <!-- History cards injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-8 py-6 text-center text-sm text-gray-500 border-t border-gray-200">
+        <p>Database kosakata dan ayat diambil dari <a href="https://quran.com/id" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-medium transition underline">quran.com/id</a></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
