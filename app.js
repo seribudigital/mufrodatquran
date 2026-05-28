@@ -172,9 +172,9 @@ const app = {
                 const nameEl = document.getElementById('user-nav-name');
                 const avatarEl = document.getElementById('user-nav-avatar');
                 
-                if (nameEl) nameEl.textContent = this.userData.nama;
+                if (nameEl) nameEl.textContent = this.userData.nama || 'User';
                 if (avatarEl) {
-                    avatarEl.textContent = this.userData.nama.charAt(0);
+                    avatarEl.textContent = this.userData.nama ? this.userData.nama.charAt(0) : 'U';
                 }
             }
 
