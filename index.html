@@ -17,9 +17,10 @@
     <meta name="twitter:title" content="Hafalan Mufrodat Al-Qur'an">
     <meta name="twitter:description" content="Mari uji dan tingkatkan hafalan kosakata kata-per-kata Al-Qur'an Anda dengan mudah, interaktif, dan menyenangkan.">
     <meta name="twitter:image" content="https://images.unsplash.com/photo-1609599006353-e629aaab31f5?q=80&w=1200&auto=format&fit=crop">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="output.css">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen overflow-y-scroll">
     
@@ -56,12 +57,12 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1" for="welcome-nama">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" id="welcome-nama" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition" placeholder="Masukkan nama Anda">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori Pengguna</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1" for="welcome-kategori">Kategori Pengguna</label>
                         <select id="welcome-kategori" onchange="app.updateKategoriForm()" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition cursor-pointer bg-white">
                             <option value="Pelajar/Santri">Pelajar / Santri</option>
                             <option value="Umum">Umum</option>
@@ -69,7 +70,7 @@
                     </div>
                     
                     <div>
-                        <label id="label-detail" class="block text-sm font-semibold text-gray-700 mb-1">Kelas / Nama Instansi Sekolah</label>
+                        <label id="label-detail" class="block text-sm font-semibold text-gray-700 mb-1" for="welcome-detail">Kelas / Nama Instansi Sekolah</label>
                         <input type="text" id="welcome-detail" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-emerald-500 transition" placeholder="Contoh: Kelas 10 / SMA Bina Bangsa">
                     </div>
                     
@@ -133,8 +134,8 @@
             </div>
 
             <div class="flex justify-between items-center mb-6 border-b pb-2 border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-700">Pilih Surat</h2>
-                <select id="juz-selector" onchange="app.changeJuz(this.value)" class="bg-white border border-gray-300 text-gray-700 py-1.5 px-3 rounded-lg outline-none font-semibold shadow-sm focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                <h2 class="text-2xl font-bold text-gray-700"><label for="juz-selector">Pilih Surat</label></h2>
+                <select id="juz-selector" aria-label="Pilih Surat" onchange="app.changeJuz(this.value)" class="bg-white border border-gray-300 text-gray-700 py-1.5 px-3 rounded-lg outline-none font-semibold shadow-sm focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                     <option value="30">Juz 30</option>
                     <option value="29">Juz 29</option>
                     <option value="28">Juz 28</option>
@@ -346,6 +347,6 @@
         <p>Database kosakata dan ayat diambil dari <a href="https://quran.com/id" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-medium transition underline">quran.com/id</a></p>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
 </body>
 </html>

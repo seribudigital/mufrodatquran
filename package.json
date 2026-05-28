@@ -1,0 +1,28 @@
+{
+  "name": "mufrodatquran",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seribudigital/mufrodatquran.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/seribudigital/mufrodatquran/issues"
+  },
+  "homepage": "https://github.com/seribudigital/mufrodatquran#readme",
+  "description": "",
+  "devDependencies": {
+    "tailwindcss": "^4.3.0"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15"
+  }
+}
