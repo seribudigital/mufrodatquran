@@ -40,12 +40,22 @@ const app = {
         
         const historyStored = localStorage.getItem('ujian_history');
         if (historyStored) {
-            this.ujianHistory = JSON.parse(historyStored);
+            try {
+                this.ujianHistory = JSON.parse(historyStored);
+            } catch(e) {
+                console.error('Failed to parse ujian_history', e);
+                this.ujianHistory = [];
+            }
         }
 
         const userStored = localStorage.getItem('userData');
         if (userStored) {
-            this.userData = JSON.parse(userStored);
+            try {
+                this.userData = JSON.parse(userStored);
+            } catch(e) {
+                console.error('Failed to parse userData', e);
+                this.userData = null;
+            }
         }
 
         await this.loadDaftarSurah();
@@ -62,7 +72,12 @@ const app = {
     loadHafalData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            this.hafalData = JSON.parse(stored);
+            try {
+                this.hafalData = JSON.parse(stored);
+            } catch(e) {
+                console.error('Failed to parse hafalData', e);
+                this.hafalData = [];
+            }
         } else {
             this.hafalData = [];
         }
