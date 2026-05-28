@@ -122,8 +122,14 @@ const app = {
     },
 
     showView(viewId) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(viewId).classList.remove('hidden');
+        document.querySelectorAll('.view-section').forEach(el => {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+        });
+        
+        const target = document.getElementById(viewId);
+        target.classList.remove('hidden');
+        target.style.display = '';
         
         const navActions = document.getElementById('nav-actions');
         if (viewId === 'view-dashboard') {
