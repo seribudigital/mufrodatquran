@@ -868,11 +868,10 @@ const app = {
                         <p class="font-arabic text-3xl text-gray-800 mb-2 arab-text" onclick="app.unblur(this)">${word.arab}</p>
                         <p class="text-sm text-gray-600 indo-text" onclick="app.unblur(this)" dir="ltr">${word.indonesia}</p>
                     </div>
-                    <button class="hafal-btn mt-auto text-xs px-3 py-1.5 rounded-full border border-gray-300 font-medium transition
-                                   ${isHafal ? 'hafal-active' : 'text-gray-500 bg-white hover:bg-gray-100'}"
-                            onclick="app.toggleHafal('${id}', this)">
-                        ${isHafal ? '✓ Hafal' : 'Tandai Hafal'}
-                    </button>
+                    <span class="mt-auto text-xs px-3 py-1.5 rounded-full border font-medium text-center transition-all duration-200
+                                 ${isHafal ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700/50 dark:bg-slate-800/30 dark:text-gray-500'}">
+                        ${isHafal ? '✓ Hafal (Ujian)' : 'Belum Hafal'}
+                    </span>
                 `;
                 wordsContainer.appendChild(wordBox);
             });
@@ -933,21 +932,7 @@ const app = {
     },
 
     toggleHafal(id, btnElement) {
-        const index = this.hafalData.indexOf(id);
-        if (index === -1) {
-            this.hafalData.push(id);
-            btnElement.classList.add('hafal-active');
-            btnElement.classList.remove('text-gray-500', 'bg-white', 'hover:bg-gray-100');
-            btnElement.textContent = '✓ Hafal';
-            this.showToast('Kata ditandai hafal! 📗', 'success', 1500);
-        } else {
-            this.hafalData.splice(index, 1);
-            btnElement.classList.remove('hafal-active');
-            btnElement.classList.add('text-gray-500', 'bg-white', 'hover:bg-gray-100');
-            btnElement.textContent = 'Tandai Hafal';
-        }
-        this.saveHafalData();
-        this.checkBadges();
+        // Dinonaktifkan karena data hafalan diperbarui secara valid hanya melalui hasil Ujian Hafalan.
     },
 
     // ──────────────────────────────────────────────────────
@@ -1042,15 +1027,7 @@ const app = {
     },
 
     nextFlashcard(isHafal) {
-        if (isHafal) {
-            const word = this.surahData[this.fcIndex];
-            const id   = this.getWordId(word);
-            if (!this.hafalData.includes(id)) {
-                this.hafalData.push(id);
-                this.saveHafalData();
-                this.checkBadges();
-            }
-        }
+        // Navigasi ke flashcard berikutnya tanpa memodifikasi data hafalan permanen.
         this.fcIndex++;
         this.renderFlashcard();
     },
