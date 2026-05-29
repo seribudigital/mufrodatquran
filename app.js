@@ -334,10 +334,13 @@ const app = {
         const q = QUOTES[this.quoteIndex];
         quoteEl.innerHTML = `${q.text}<br><span class="text-sm font-semibold">${q.src}</span>`;
 
-        // Trigger animasi ulang
+        // Trigger animasi ulang tanpa forced reflow (offsetWidth)
         quoteEl.classList.remove('quote-anim');
-        void quoteEl.offsetWidth;
-        quoteEl.classList.add('quote-anim');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                quoteEl.classList.add('quote-anim');
+            });
+        });
 
         if (numEl) numEl.textContent = `Kutipan ${this.quoteIndex + 1} dari ${QUOTES.length}`;
     },
@@ -590,7 +593,10 @@ const app = {
             navActions.classList.remove('hidden');
         }
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Jalankan scrollTo di frame berikutnya untuk menghindari forced reflow dari perubahan display DOM di atas
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     },
 
     /**
