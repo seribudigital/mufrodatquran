@@ -1026,7 +1026,7 @@ const app = {
         if (card) card.classList.toggle('flipped');
     },
 
-    nextFlashcard(isHafal) {
+    nextFlashcard() {
         // Navigasi ke flashcard berikutnya tanpa memodifikasi data hafalan permanen.
         this.fcIndex++;
         this.renderFlashcard();
