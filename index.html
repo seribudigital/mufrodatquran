@@ -188,6 +188,22 @@
         .audio-btn:hover { background: #d1fae5; transform: scale(1.05); }
         .audio-btn.playing { background: #059669; color: white; border-color: #059669; }
 
+        .ayat-audio-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #ecfdf5; border: 1.5px solid #6ee7b7;
+            color: #059669; border-radius: 50%; width: 32px; height: 32px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .ayat-audio-btn:hover { background: #d1fae5; transform: scale(1.05); }
+        .ayat-audio-btn.playing { background: #059669 !important; color: white !important; border-color: #059669 !important; }
+
+        [data-theme="dark"] .ayat-audio-btn {
+            background: #064e3b !important; border-color: #10b981 !important; color: #34d399 !important;
+        }
+        [data-theme="dark"] .ayat-audio-btn.playing {
+            background: #10b981 !important; color: white !important; border-color: #10b981 !important;
+        }
+
         /* ============================================================
            DARK MODE TOGGLE BUTTON
         ============================================================ */

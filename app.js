@@ -474,6 +474,11 @@ const app = {
             this.currentAudio = null;
         }
 
+        // Hapus class 'playing' dari tombol audio ayat lain
+        document.querySelectorAll('.ayat-audio-btn.playing').forEach(btn => {
+            btn.classList.remove('playing');
+        });
+
         const btn = document.getElementById('fc-audio-btn');
         const url = `https://audio.qurancdn.com/wbw/${word.surah}_${word.ayat}_${word.urutan_kata}.mp3`;
 
@@ -487,6 +492,40 @@ const app = {
         this.currentAudio.onerror = () => {
             if (btn) btn.classList.remove('playing');
             this._fallbackTTS(word.arab);
+        };
+    },
+
+    playAyatAudio(surahId, nomorAyat, btnElement) {
+        // Hentikan audio sebelumnya
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+
+        // Hapus class 'playing' dari tombol audio ayat lain dan tombol flashcard
+        document.querySelectorAll('.ayat-audio-btn.playing').forEach(btn => {
+            btn.classList.remove('playing');
+        });
+        const fcBtn = document.getElementById('fc-audio-btn');
+        if (fcBtn) fcBtn.classList.remove('playing');
+
+        const url = `https://cdn.alquran.cloud/media/audio/ayah/ar.alafasy/${surahId}:${nomorAyat}`;
+        this.currentAudio = new Audio(url);
+
+        this.currentAudio.play()
+            .then(() => {
+                if (btnElement) btnElement.classList.add('playing');
+            })
+            .catch(err => {
+                console.error("Gagal memutar audio ayat:", err);
+            });
+
+        this.currentAudio.onended = () => {
+            if (btnElement) btnElement.classList.remove('playing');
+        };
+
+        this.currentAudio.onerror = () => {
+            if (btnElement) btnElement.classList.remove('playing');
         };
     },
 
@@ -824,7 +863,14 @@ const app = {
 
             let html = `
                 <div class="flex justify-between items-center mb-4">
-                    <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">${ayat.ayat}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">${ayat.ayat}</span>
+                        <button onclick="app.playAyatAudio(${ayat.surah}, ${ayat.ayat}, this)" 
+                                class="ayat-audio-btn w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center text-xs transition duration-200" 
+                                title="Putar Audio Ayat">
+                            🔊
+                        </button>
+                    </div>
                 </div>
                 <p class="font-arabic text-4xl text-gray-800 leading-loose text-right mb-4" dir="rtl">${ayat.teks_arab || ''}</p>
             `;
