@@ -509,24 +509,42 @@ const app = {
         const fcBtn = document.getElementById('fc-audio-btn');
         if (fcBtn) fcBtn.classList.remove('playing');
 
-        const url = `https://cdn.alquran.cloud/media/audio/ayah/ar.alafasy/${surahId}:${nomorAyat}`;
-        this.currentAudio = new Audio(url);
+        if (btnElement) btnElement.classList.add('playing');
 
-        this.currentAudio.play()
-            .then(() => {
-                if (btnElement) btnElement.classList.add('playing');
+        const apiUrl = `https://api.alquran.cloud/v1/ayah/${surahId}:${nomorAyat}/ar.alafasy`;
+        
+        fetch(apiUrl)
+            .then(res => {
+                if (!res.ok) throw new Error('Gagal mengambil data audio dari API');
+                return res.json();
+            })
+            .then(json => {
+                // Jika tombol ini sudah tidak memiliki class 'playing' (misal pengguna memencet tombol lain selama loading)
+                if (btnElement && !btnElement.classList.contains('playing')) {
+                    return;
+                }
+
+                const audioUrl = json.data.audio;
+                this.currentAudio = new Audio(audioUrl);
+
+                this.currentAudio.play()
+                    .catch(err => {
+                        console.error("Gagal memutar audio ayat:", err);
+                        if (btnElement) btnElement.classList.remove('playing');
+                    });
+
+                this.currentAudio.onended = () => {
+                    if (btnElement) btnElement.classList.remove('playing');
+                };
+
+                this.currentAudio.onerror = () => {
+                    if (btnElement) btnElement.classList.remove('playing');
+                };
             })
             .catch(err => {
-                console.error("Gagal memutar audio ayat:", err);
+                console.error("Error API audio ayat:", err);
+                if (btnElement) btnElement.classList.remove('playing');
             });
-
-        this.currentAudio.onended = () => {
-            if (btnElement) btnElement.classList.remove('playing');
-        };
-
-        this.currentAudio.onerror = () => {
-            if (btnElement) btnElement.classList.remove('playing');
-        };
     },
 
     _fallbackTTS(text) {
