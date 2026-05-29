@@ -81,6 +81,7 @@ const app = {
 
     // Kutipan
     quoteIndex: 0,
+    quoteInterval: null,
 
     // ──────────────────────────────────────────────────────
     //  INISIALISASI
@@ -90,6 +91,7 @@ const app = {
         this.loadEarnedBadges();
         this.loadStreak();
         this.applyTheme();
+        this.startQuoteRotation();
 
         const historyStored = localStorage.getItem('ujian_history');
         if (historyStored) {
@@ -310,6 +312,18 @@ const app = {
     nextQuote() {
         this.quoteIndex = (this.quoteIndex + 1) % QUOTES.length;
         this._renderQuote();
+        this.startQuoteRotation(); // Reset timer saat diklik manual
+    },
+
+    startQuoteRotation() {
+        if (this.quoteInterval) clearInterval(this.quoteInterval);
+        this.quoteInterval = setInterval(() => {
+            const dashboardEl = document.getElementById('view-dashboard');
+            if (dashboardEl && !dashboardEl.classList.contains('hidden')) {
+                this.quoteIndex = (this.quoteIndex + 1) % QUOTES.length;
+                this._renderQuote();
+            }
+        }, 8000); // Ganti otomatis setiap 8 detik
     },
 
     _renderQuote() {
