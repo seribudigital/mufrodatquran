@@ -537,81 +537,89 @@ const app = {
 
         this.currentRangePlayingAyat = nomorAyat;
 
-        const apiUrl = `https://api.alquran.cloud/v1/ayah/${surahId}:${nomorAyat}/ar.alafasy`;
-        
-        fetch(apiUrl)
-            .then(res => {
-                if (!res.ok) throw new Error('Gagal mengambil data audio dari API');
-                return res.json();
-            })
-            .then(json => {
-                // Jika tombol ini sudah tidak memiliki class 'playing' (misal pengguna memencet tombol lain selama loading)
-                if (btnElement && !btnElement.classList.contains('playing')) {
-                    return;
-                }
+        const isOffline = surahId >= 78;
+        const localAudioUrl = `./audio_juz30/${surahId}_${nomorAyat}.mp3`;
 
-                const audioUrl = json.data.audio;
-                
-                const playWithRepeat = () => {
-                    this.currentAudio = new Audio(audioUrl);
-                    this.currentAudio.play()
-                        .catch(err => {
-                            console.error("Gagal memutar audio ayat:", err);
-                            cleanup();
-                        });
+        const startPlaying = (url) => {
+            const playWithRepeat = () => {
+                this.currentAudio = new Audio(url);
+                this.currentAudio.play()
+                    .catch(err => {
+                        console.error("Gagal memutar audio ayat:", err);
+                        cleanup();
+                    });
 
-                    this.currentAudio.onended = () => {
-                        this.currentAyatRepeatPlayedCount++;
-                        if (this.currentAyatRepeatPlayedCount < this.audioRepeatCount) {
-                            playWithRepeat();
-                        } else {
-                            // Selesai dengan ayat ini
-                            cleanup();
-                            // Pindah ke ayat berikutnya jika range play aktif
-                            if (this.isPlayingRange) {
-                                const nextAyat = nomorAyat + 1;
-                                if (nextAyat <= this.rangeEndAyat) {
-                                    // Cari tombol play untuk ayat berikutnya
-                                    setTimeout(() => {
-                                        const nextBtn = document.querySelector(`.ayat-audio-btn[data-ayat="${nextAyat}"]`);
-                                        this.currentAyatRepeatPlayedCount = 0;
-                                        this.playAyatAudio(surahId, nextAyat, nextBtn, true);
-                                    }, 800); // jeda sedikit antar ayat agar terdengar natural
-                                } else {
-                                    this._stopRangePlay();
-                                    this.showToast('Selesai memutar rangkaian ayat.', 'success');
-                                }
+                this.currentAudio.onended = () => {
+                    this.currentAyatRepeatPlayedCount++;
+                    if (this.currentAyatRepeatPlayedCount < this.audioRepeatCount) {
+                        playWithRepeat();
+                    } else {
+                        // Selesai dengan ayat ini
+                        cleanup();
+                        // Pindah ke ayat berikutnya jika range play aktif
+                        if (this.isPlayingRange) {
+                            const nextAyat = nomorAyat + 1;
+                            if (nextAyat <= this.rangeEndAyat) {
+                                // Cari tombol play untuk ayat berikutnya
+                                setTimeout(() => {
+                                    const nextBtn = document.querySelector(`.ayat-audio-btn[data-ayat="${nextAyat}"]`);
+                                    this.currentAyatRepeatPlayedCount = 0;
+                                    this.playAyatAudio(surahId, nextAyat, nextBtn, true);
+                                }, 800); // jeda sedikit antar ayat agar terdengar natural
+                            } else {
+                                this._stopRangePlay();
+                                this.showToast('Selesai memutar rangkaian ayat.', 'success');
                             }
                         }
-                    };
-
-                    this.currentAudio.onerror = () => {
-                        cleanup();
-                        if (this.isPlayingRange) {
-                            this._stopRangePlay();
-                        }
-                    };
-                };
-
-                const cleanup = () => {
-                    if (btnElement) btnElement.classList.remove('playing');
-                    const ab = document.getElementById(`ayat-block-${nomorAyat}`);
-                    if (ab && !this.isPlayingRange) {
-                        ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
                     }
                 };
 
-                playWithRepeat();
-            })
-            .catch(err => {
-                console.error("Error API audio ayat:", err);
+                this.currentAudio.onerror = () => {
+                    cleanup();
+                    if (this.isPlayingRange) {
+                        this._stopRangePlay();
+                    }
+                };
+            };
+
+            const cleanup = () => {
                 if (btnElement) btnElement.classList.remove('playing');
                 const ab = document.getElementById(`ayat-block-${nomorAyat}`);
-                if (ab) ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
-                if (this.isPlayingRange) {
-                    this._stopRangePlay();
+                if (ab && !this.isPlayingRange) {
+                    ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
                 }
-            });
+            };
+
+            playWithRepeat();
+        };
+
+        if (isOffline) {
+            // Putar audio lokal secara offline
+            startPlaying(localAudioUrl);
+        } else {
+            // Ambil URL online
+            const apiUrl = `https://api.alquran.cloud/v1/ayah/${surahId}:${nomorAyat}/ar.alafasy`;
+            fetch(apiUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error('Gagal mengambil data audio dari API');
+                    return res.json();
+                })
+                .then(json => {
+                    if (btnElement && !btnElement.classList.contains('playing')) {
+                        return;
+                    }
+                    startPlaying(json.data.audio);
+                })
+                .catch(err => {
+                    console.error("Error API audio ayat:", err);
+                    if (btnElement) btnElement.classList.remove('playing');
+                    const ab = document.getElementById(`ayat-block-${nomorAyat}`);
+                    if (ab) ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
+                    if (this.isPlayingRange) {
+                        this._stopRangePlay();
+                    }
+                });
+        }
     },
 
     _fallbackTTS(text) {
