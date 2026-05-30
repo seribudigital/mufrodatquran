@@ -57,6 +57,12 @@ const app = {
 
     // Baca Quran
     bacaMode: 'saja',
+    audioRepeatCount: 1,
+    isPlayingRange: false,
+    rangeStartAyat: 1,
+    rangeEndAyat: 1,
+    currentRangePlayingAyat: null,
+    currentAyatRepeatPlayedCount: 0,
 
     // Tutup Kata
     isArabBlurred: false,
@@ -495,11 +501,21 @@ const app = {
         };
     },
 
-    playAyatAudio(surahId, nomorAyat, btnElement) {
+    playAyatAudio(surahId, nomorAyat, btnElement, isFromRange = false) {
+        // Hapus highlight dari ayat lain
+        document.querySelectorAll('.ayat-block').forEach(el => {
+            el.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
+        });
+
         // Hentikan audio sebelumnya
         if (this.currentAudio) {
             this.currentAudio.pause();
             this.currentAudio = null;
+        }
+
+        // Jika diputar secara manual (bukan dari rangkaian), hentikan mode rangkaian
+        if (!isFromRange && this.isPlayingRange) {
+            this._stopRangePlay();
         }
 
         // Hapus class 'playing' dari tombol audio ayat lain dan tombol flashcard
@@ -510,6 +526,16 @@ const app = {
         if (fcBtn) fcBtn.classList.remove('playing');
 
         if (btnElement) btnElement.classList.add('playing');
+
+        // Tambahkan highlight ke kartu ayat yang sedang diputar
+        const ayatBlock = document.getElementById(`ayat-block-${nomorAyat}`);
+        if (ayatBlock) {
+            ayatBlock.classList.add('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
+            // Auto-scroll ke ayat tersebut
+            ayatBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        this.currentRangePlayingAyat = nomorAyat;
 
         const apiUrl = `https://api.alquran.cloud/v1/ayah/${surahId}:${nomorAyat}/ar.alafasy`;
         
@@ -525,25 +551,66 @@ const app = {
                 }
 
                 const audioUrl = json.data.audio;
-                this.currentAudio = new Audio(audioUrl);
+                
+                const playWithRepeat = () => {
+                    this.currentAudio = new Audio(audioUrl);
+                    this.currentAudio.play()
+                        .catch(err => {
+                            console.error("Gagal memutar audio ayat:", err);
+                            cleanup();
+                        });
 
-                this.currentAudio.play()
-                    .catch(err => {
-                        console.error("Gagal memutar audio ayat:", err);
-                        if (btnElement) btnElement.classList.remove('playing');
-                    });
+                    this.currentAudio.onended = () => {
+                        this.currentAyatRepeatPlayedCount++;
+                        if (this.currentAyatRepeatPlayedCount < this.audioRepeatCount) {
+                            playWithRepeat();
+                        } else {
+                            // Selesai dengan ayat ini
+                            cleanup();
+                            // Pindah ke ayat berikutnya jika range play aktif
+                            if (this.isPlayingRange) {
+                                const nextAyat = nomorAyat + 1;
+                                if (nextAyat <= this.rangeEndAyat) {
+                                    // Cari tombol play untuk ayat berikutnya
+                                    setTimeout(() => {
+                                        const nextBtn = document.querySelector(`.ayat-audio-btn[data-ayat="${nextAyat}"]`);
+                                        this.currentAyatRepeatPlayedCount = 0;
+                                        this.playAyatAudio(surahId, nextAyat, nextBtn, true);
+                                    }, 800); // jeda sedikit antar ayat agar terdengar natural
+                                } else {
+                                    this._stopRangePlay();
+                                    this.showToast('Selesai memutar rangkaian ayat.', 'success');
+                                }
+                            }
+                        }
+                    };
 
-                this.currentAudio.onended = () => {
-                    if (btnElement) btnElement.classList.remove('playing');
+                    this.currentAudio.onerror = () => {
+                        cleanup();
+                        if (this.isPlayingRange) {
+                            this._stopRangePlay();
+                        }
+                    };
                 };
 
-                this.currentAudio.onerror = () => {
+                const cleanup = () => {
                     if (btnElement) btnElement.classList.remove('playing');
+                    const ab = document.getElementById(`ayat-block-${nomorAyat}`);
+                    if (ab && !this.isPlayingRange) {
+                        ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
+                    }
                 };
+
+                playWithRepeat();
             })
             .catch(err => {
                 console.error("Error API audio ayat:", err);
                 if (btnElement) btnElement.classList.remove('playing');
+                const ab = document.getElementById(`ayat-block-${nomorAyat}`);
+                if (ab) ab.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
+                if (this.isPlayingRange) {
+                    this._stopRangePlay();
+                }
             });
     },
 
@@ -632,6 +699,10 @@ const app = {
         // Hentikan ujian sepenuhnya jika user keluar dari halaman ujian
         if (viewId !== 'view-ujian') {
             this._stopUjian();
+        }
+        // Hentikan pemutaran rangkaian ayat jika keluar dari mode baca quran
+        if (viewId !== 'view-baca-quran') {
+            this._stopRangePlay();
         }
 
         document.querySelectorAll('.view-section').forEach(el => {
@@ -845,6 +916,24 @@ const app = {
             </button>
         `;
         this.showView('view-baca-quran');
+        
+        // Hentikan pemutaran rangkaian yang sedang berjalan sebelumnya
+        this._stopRangePlay();
+
+        // Cari tahu jumlah total ayat
+        const ayatList = this.terjemahanData.filter(t => t.surah === this.currentSurah);
+        const totalAyat = ayatList.length;
+
+        // Inisialisasi dropdown rangkaian ayat
+        this.initRangeSelectors(totalAyat);
+
+        // Reset repeat dropdown value to 1
+        const repeatSelect = document.getElementById('audio-repeat-select');
+        if (repeatSelect) {
+            repeatSelect.value = "1";
+            this.audioRepeatCount = 1;
+        }
+
         this.renderBacaQuran();
     },
 
@@ -877,7 +966,8 @@ const app = {
 
         ayatList.forEach(ayat => {
             const block = document.createElement('div');
-            block.className = 'bg-white p-6 rounded-xl shadow-sm border border-gray-100';
+            block.id = `ayat-block-${ayat.ayat}`;
+            block.className = 'ayat-block bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all duration-300';
 
             let html = `
                 <div class="flex justify-between items-center mb-4">
@@ -885,6 +975,7 @@ const app = {
                         <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">${ayat.ayat}</span>
                         <button onclick="app.playAyatAudio(${ayat.surah}, ${ayat.ayat}, this)" 
                                 class="ayat-audio-btn w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center text-xs transition duration-200" 
+                                data-ayat="${ayat.ayat}"
                                 title="Putar Audio Ayat">
                             🔊
                         </button>
@@ -899,6 +990,115 @@ const app = {
 
             block.innerHTML = html;
             container.appendChild(block);
+        });
+    },
+
+    initRangeSelectors(totalAyat) {
+        const startSelect = document.getElementById('range-start-select');
+        const endSelect = document.getElementById('range-end-select');
+        if (!startSelect || !endSelect) return;
+
+        startSelect.innerHTML = '';
+        endSelect.innerHTML = '';
+
+        for (let i = 1; i <= totalAyat; i++) {
+            const opt1 = document.createElement('option');
+            opt1.value = i;
+            opt1.textContent = i;
+            startSelect.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = i;
+            opt2.textContent = i;
+            endSelect.appendChild(opt2);
+        }
+
+        // Set defaults
+        startSelect.value = 1;
+        endSelect.value = totalAyat;
+        this.rangeStartAyat = 1;
+        this.rangeEndAyat = totalAyat;
+    },
+
+    validateAyatRange(type) {
+        const startSelect = document.getElementById('range-start-select');
+        const endSelect = document.getElementById('range-end-select');
+        if (!startSelect || !endSelect) return;
+
+        let startVal = parseInt(startSelect.value);
+        let endVal = parseInt(endSelect.value);
+
+        if (startVal > endVal) {
+            if (type === 'start') {
+                endSelect.value = startVal;
+                endVal = startVal;
+            } else {
+                startSelect.value = endVal;
+                startVal = endVal;
+            }
+        }
+
+        this.rangeStartAyat = startVal;
+        this.rangeEndAyat = endVal;
+    },
+
+    setAudioRepeat(val) {
+        this.audioRepeatCount = parseInt(val);
+    },
+
+    toggleRangePlay() {
+        if (this.isPlayingRange) {
+            this._stopRangePlay();
+            this.showToast('Pemutaran rangkaian dihentikan.', 'info');
+        } else {
+            this.isPlayingRange = true;
+            this.currentAyatRepeatPlayedCount = 0;
+            
+            const btn = document.getElementById('btn-play-range');
+            const icon = document.getElementById('btn-play-range-icon');
+            const text = document.getElementById('btn-play-range-text');
+            
+            if (btn) {
+                btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+            }
+            if (icon) icon.textContent = '⏹';
+            if (text) text.textContent = 'Hentikan';
+
+            // Mulai putar dari rangeStartAyat
+            const startBtn = document.querySelector(`.ayat-audio-btn[data-ayat="${this.rangeStartAyat}"]`);
+            this.playAyatAudio(this.currentSurah, this.rangeStartAyat, startBtn, true);
+        }
+    },
+
+    _stopRangePlay() {
+        this.isPlayingRange = false;
+        this.currentAyatRepeatPlayedCount = 0;
+        
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+
+        const btn = document.getElementById('btn-play-range');
+        const icon = document.getElementById('btn-play-range-icon');
+        const text = document.getElementById('btn-play-range-text');
+        
+        if (btn) {
+            btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        }
+        if (icon) icon.textContent = '▶';
+        if (text) text.textContent = 'Putar Rangkaian';
+
+        // Hapus class playing pada tombol audio
+        document.querySelectorAll('.ayat-audio-btn.playing').forEach(b => {
+            b.classList.remove('playing');
+        });
+
+        // Hapus highlight dari semua block ayat
+        document.querySelectorAll('.ayat-block').forEach(el => {
+            el.classList.remove('border-emerald-500', 'bg-emerald-50/30', 'dark:border-emerald-500', 'dark:bg-emerald-950/20');
         });
     },
 
